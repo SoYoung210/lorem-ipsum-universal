@@ -22,8 +22,6 @@ figma.ui.onmessage = (msg: PluginMessage) => {
   try {
     loadFonts().then(() => {
       if (msg.type === 'create-text') {
-        console.log('message in', msg);
-
         const textNode = figma.createText();
         textNode.characters = msg.options.content;
         textNode.resize(375, textNode.height);
