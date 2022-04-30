@@ -21,7 +21,10 @@ export enum ERRORS {
  * Plugin Interface
  */
 
-export type MessageType = 'sync-storage-config-value' | 'create-text';
+export type MessageType =
+  | 'sync-storage-config-value'
+  | 'create-text'
+  | 'replace-text';
 export interface LoremOption {
   content: string;
 }

@@ -21,6 +21,19 @@ async function loadFonts() {
 figma.ui.onmessage = (msg: PluginMessage) => {
   try {
     loadFonts().then(() => {
+      if (msg.type === 'replace-text') {
+        if (figma.currentPage.selection.length === 0) {
+          figma.notify('Please select more than one text node.');
+          return;
+        }
+
+        figma.currentPage.selection
+          .filter(
+            (selection): selection is TextNode => selection.type === 'TEXT'
+          )
+          .forEach(selection => (selection.characters = msg.options.content));
+      }
+
       if (msg.type === 'create-text') {
         const textNode = figma.createText();
         textNode.characters = msg.options.content;

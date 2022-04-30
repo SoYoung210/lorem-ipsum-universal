@@ -2,7 +2,7 @@ import { Box, NumberInput, Button, Group, Select } from '@mantine/core';
 import React, { FormEvent, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { CONTENT, generateRandomText } from './content';
-import { PluginMessage } from './model';
+import { MessageType, PluginMessage } from './model';
 
 type Language = 'ko' | 'en';
 interface FormValue {
@@ -14,14 +14,25 @@ interface FormValue {
   };
 }
 
+const SUBMIT_TYPE: Record<
+  string,
+  Exclude<MessageType, 'sync-storage-config-value'>
+> = {
+  CREATE: 'create-text',
+  REPLACE: 'replace-text',
+};
+
 function App() {
   const [language, setLanguage] = useState<Language>('ko');
   const handleCreate = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
+      const eventType: MessageType =
+        (e.nativeEvent.submitter?.value as MessageType | undefined) ??
+        'create-text';
+
       const formTarget = e.target as unknown as FormValue;
-      console.log('language', language);
 
       const content = generateRandomText({
         paragraphCount: formTarget.paragraphs.value,
@@ -29,7 +40,7 @@ function App() {
       });
 
       const pluginMessage: PluginMessage = {
-        type: 'create-text',
+        type: eventType,
         options: {
           content,
         },
@@ -67,7 +78,12 @@ function App() {
               onChange={v => setLanguage(v as Language)}
             />
           </Group>
-          <Button type="submit">Create</Button>
+          <Button type="submit" value={SUBMIT_TYPE.CREATE}>
+            Create
+          </Button>
+          <Button type="submit" value={SUBMIT_TYPE.REPLACE}>
+            Replace
+          </Button>
         </Group>
       </form>
     </Box>
