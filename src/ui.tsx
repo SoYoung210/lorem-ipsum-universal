@@ -1,13 +1,24 @@
-import { Box, NumberInput, Button, Group, Select } from '@mantine/core';
+import {
+  Box,
+  NumberInput,
+  Button,
+  Group,
+  Select,
+  RadioGroup,
+  Radio,
+} from '@mantine/core';
 import React, { FormEvent, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { CONTENT, generateRandomText } from './content';
-import { MessageType, PluginMessage } from './model';
+import { MessageType, ParagraphLength, PluginMessage } from './model';
 
 type Language = 'ko' | 'en';
 interface FormValue {
   language: {
     value: 'ko' | 'en';
+  };
+  paragraphLength: {
+    value: ParagraphLength;
   };
   paragraphs: {
     value: number;
@@ -33,10 +44,12 @@ function App() {
         'create-text';
 
       const formTarget = e.target as unknown as FormValue;
+      const paragraphLength = formTarget.paragraphLength.value;
 
       const content = generateRandomText({
         paragraphCount: formTarget.paragraphs.value,
         baseSource: CONTENT[language],
+        paragraphLength,
       });
 
       const pluginMessage: PluginMessage = {
@@ -53,15 +66,8 @@ function App() {
   return (
     <Box sx={{ padding: '16px' }}>
       <form onSubmit={handleCreate}>
-        <Group spacing={8} direction="column">
+        <Group spacing={18} direction="column">
           <Group spacing={6}>
-            <NumberInput
-              name="paragraphs"
-              defaultValue={3}
-              placeholder="Paragraphs"
-              label="Number of Paragraphs"
-              required
-            />
             {/**
              * mantine does not support uncontrolled
              * https://github.com/mantinedev/mantine/issues/1137
@@ -77,13 +83,30 @@ function App() {
               ]}
               onChange={v => setLanguage(v as Language)}
             />
+            <RadioGroup
+              name="paragraphLength"
+              label="paragraph length"
+              defaultValue="medium"
+            >
+              <Radio value="short">short</Radio>
+              <Radio value="medium">medium</Radio>
+              <Radio value="long">long</Radio>
+            </RadioGroup>
+            <NumberInput
+              name="paragraphs"
+              defaultValue={3}
+              placeholder="Paragraphs"
+              label="Number of Paragraphs"
+            />
           </Group>
-          <Button type="submit" value={SUBMIT_TYPE.CREATE}>
-            Create
-          </Button>
-          <Button type="submit" value={SUBMIT_TYPE.REPLACE}>
-            Replace
-          </Button>
+          <Group spacing={6}>
+            <Button type="submit" value={SUBMIT_TYPE.CREATE}>
+              Create
+            </Button>
+            <Button type="submit" value={SUBMIT_TYPE.REPLACE}>
+              Replace
+            </Button>
+          </Group>
         </Group>
       </form>
     </Box>
