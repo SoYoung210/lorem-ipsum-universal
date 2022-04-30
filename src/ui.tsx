@@ -100,11 +100,11 @@ function App() {
             />
           </Group>
           <Group spacing={6}>
-            <Button type="submit" value={SUBMIT_TYPE.CREATE}>
-              Create
-            </Button>
             <Button type="submit" value={SUBMIT_TYPE.REPLACE}>
               Replace
+            </Button>
+            <Button type="submit" variant="outline" value={SUBMIT_TYPE.CREATE}>
+              Create
             </Button>
           </Group>
         </Group>
