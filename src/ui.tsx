@@ -67,7 +67,7 @@ function App() {
     <Box sx={{ padding: '16px' }}>
       <form onSubmit={handleCreate}>
         <Group spacing={18} direction="column">
-          <Group spacing={6}>
+          <Group spacing={12}>
             {/**
              * mantine does not support uncontrolled
              * https://github.com/mantinedev/mantine/issues/1137

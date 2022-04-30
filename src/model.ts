@@ -25,6 +25,8 @@ export type MessageType =
   | 'sync-storage-config-value'
   | 'create-text'
   | 'replace-text';
+
+export type ParagraphLength = 'short' | 'medium' | 'long';
 export interface LoremOption {
   content: string;
 }
@@ -41,4 +43,9 @@ export interface PluginEvent<T> extends Event {
       payload: T;
     };
   };
+}
+
+export interface FontName {
+  readonly family: string;
+  readonly style: string;
 }

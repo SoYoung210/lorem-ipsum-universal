@@ -1,4 +1,4 @@
-import { CodedError, PluginMessage } from './model';
+import { CodedError, PluginMessage, FontName } from './model';
 
 // const STORAGE_KEY = '__LOREM_IPSUM_UNIVERSAL_CONFIGURATION_KEY';
 
@@ -11,30 +11,21 @@ figma.showUI(__html__, { width: 300, height: 300 });
 //   });
 // });
 
-async function loadFonts() {
+const defaultFontName: FontName = {
+  family: 'Inter',
+  style: 'Regular',
+};
+async function loadFonts(params: FontName = defaultFontName) {
   // TODO: font
-  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+  await figma.loadFontAsync(params);
 
   console.log('Awaiting the fonts.');
 }
 
 figma.ui.onmessage = (msg: PluginMessage) => {
   try {
-    loadFonts().then(() => {
-      if (msg.type === 'replace-text') {
-        if (figma.currentPage.selection.length === 0) {
-          figma.notify('Please select more than one text node.');
-          return;
-        }
-
-        figma.currentPage.selection
-          .filter(
-            (selection): selection is TextNode => selection.type === 'TEXT'
-          )
-          .forEach(selection => (selection.characters = msg.options.content));
-      }
-
-      if (msg.type === 'create-text') {
+    if (msg.type === 'create-text') {
+      loadFonts().then(() => {
         const textNode = figma.createText();
         textNode.characters = msg.options.content;
         textNode.resize(375, textNode.height);
@@ -42,9 +33,30 @@ figma.ui.onmessage = (msg: PluginMessage) => {
 
         figma.currentPage.selection = [textNode];
         figma.viewport.scrollAndZoomIntoView([textNode]);
-        // figma.clientStorage.setAsync(STORAGE_KEY, JSON.stringify(msg.option));
+      });
+    }
+
+    if (msg.type === 'replace-text') {
+      if (figma.currentPage.selection.length === 0) {
+        figma.closePlugin('Please select more than one text node.');
+        return;
       }
-    });
+
+      figma.currentPage.selection
+        .filter((selection): selection is TextNode => selection.type === 'TEXT')
+        .forEach(selection => {
+          if (!isSingleFontName(selection.fontName)) {
+            figma.notify('Multiple font styles are not supported.');
+            return;
+          }
+
+          const prevWidth = selection.width;
+          loadFonts(selection.fontName).then(() => {
+            selection.characters = msg.options.content;
+            selection.resize(prevWidth, selection.height);
+          });
+        });
+    }
   } catch (e) {
     if (e instanceof CodedError) {
       return figma.notify(e.message);
@@ -54,3 +66,9 @@ figma.ui.onmessage = (msg: PluginMessage) => {
     figma.closePlugin('Unexpected Error');
   }
 };
+
+function isSingleFontName(
+  fontName: FontName | PluginAPI['mixed']
+): fontName is FontName {
+  return (fontName as FontName).family != null;
+}
