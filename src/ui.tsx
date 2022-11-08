@@ -4,8 +4,8 @@ import {
   Button,
   Group,
   Select,
-  RadioGroup,
   Radio,
+  Stack,
 } from '@mantine/core';
 import React, { FormEvent, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -66,7 +66,7 @@ function App() {
   return (
     <Box sx={{ padding: '16px' }}>
       <form onSubmit={handleCreate}>
-        <Group spacing={18} direction="column">
+        <Stack spacing={18}>
           <Group spacing={12}>
             {/**
              * mantine does not support uncontrolled
@@ -74,7 +74,7 @@ function App() {
              */}
             <Select
               name="language"
-              label="Language"
+              label="Language123"
               placeholder="Pick one"
               value={language}
               data={[
@@ -83,15 +83,16 @@ function App() {
               ]}
               onChange={v => setLanguage(v as Language)}
             />
-            <RadioGroup
+            <Radio.Group
               name="paragraphLength"
               label="paragraph length"
               defaultValue="medium"
+              orientation="vertical"
             >
               <Radio value="short">short</Radio>
               <Radio value="medium">medium</Radio>
               <Radio value="long">long</Radio>
-            </RadioGroup>
+            </Radio.Group>
             <NumberInput
               name="paragraphs"
               defaultValue={3}
@@ -107,7 +108,7 @@ function App() {
               Create
             </Button>
           </Group>
-        </Group>
+        </Stack>
       </form>
     </Box>
   );
