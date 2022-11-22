@@ -2,7 +2,7 @@ import { CodedError, PluginMessage, FontName } from './model';
 
 // const STORAGE_KEY = '__LOREM_IPSUM_UNIVERSAL_CONFIGURATION_KEY';
 
-figma.showUI(__html__, { width: 300, height: 300 });
+figma.showUI(__html__, { width: 300, height: 500 });
 // figma.clientStorage.getAsync(STORAGE_KEY).then(existConfig => {
 //   figma.showUI(__html__, { width: 600, height: 800 });
 //   figma.ui.postMessage({
