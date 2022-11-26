@@ -4,8 +4,8 @@ import {
   Button,
   Group,
   Select,
-  RadioGroup,
   Radio,
+  Stack,
 } from '@mantine/core';
 import React, { FormEvent, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -13,12 +13,13 @@ import { CONTENT, generateRandomText } from './content';
 import { MessageType, ParagraphLength, PluginMessage } from './model';
 
 type Language = 'ko' | 'en';
+type ParagraphLengthType = ParagraphLength | 'custom';
 interface FormValue {
   language: {
     value: 'ko' | 'en';
   };
   paragraphLength: {
-    value: ParagraphLength;
+    value: ParagraphLengthType;
   };
   paragraphs: {
     value: number;
@@ -33,8 +34,18 @@ const SUBMIT_TYPE: Record<
   REPLACE: 'replace-text',
 };
 
+const TEXT_LENGTH: Record<ParagraphLength, number> = {
+  short: 125,
+  medium: 160,
+  long: 240,
+};
+
 function App() {
   const [language, setLanguage] = useState<Language>('ko');
+  const [paragraphLengthType, setParagraphLengthType] =
+    useState<ParagraphLengthType>('medium');
+  const [paragraphCharacterCount, setParagraphCharacterCount] = useState(30);
+
   const handleCreate = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -45,11 +56,14 @@ function App() {
 
       const formTarget = e.target as unknown as FormValue;
       const paragraphLength = formTarget.paragraphLength.value;
+      const isCustomParagraphLength = paragraphLength === 'custom';
 
       const content = generateRandomText({
         paragraphCount: formTarget.paragraphs.value,
         baseSource: CONTENT[language],
-        paragraphLength,
+        characterPerParagraph: isCustomParagraphLength
+          ? paragraphCharacterCount
+          : TEXT_LENGTH[paragraphLength],
       });
 
       const pluginMessage: PluginMessage = {
@@ -60,13 +74,13 @@ function App() {
       };
       parent.postMessage({ pluginMessage }, '*');
     },
-    [language]
+    [language, paragraphCharacterCount]
   );
 
   return (
     <Box sx={{ padding: '16px' }}>
       <form onSubmit={handleCreate}>
-        <Group spacing={18} direction="column">
+        <Stack spacing={18}>
           <Group spacing={12}>
             {/**
              * mantine does not support uncontrolled
@@ -83,15 +97,26 @@ function App() {
               ]}
               onChange={v => setLanguage(v as Language)}
             />
-            <RadioGroup
+            <Radio.Group
               name="paragraphLength"
               label="paragraph length"
-              defaultValue="medium"
+              value={paragraphLengthType}
+              orientation="vertical"
+              onChange={v => setParagraphLengthType(v as ParagraphLength)}
             >
-              <Radio value="short">short</Radio>
-              <Radio value="medium">medium</Radio>
-              <Radio value="long">long</Radio>
-            </RadioGroup>
+              <Radio value="short" label="short" />
+              <Radio value="medium" label="medium" />
+              <Radio value="long" label="long" />
+              <Radio value="custom" label="custom" />
+              {paragraphLengthType === 'custom' && (
+                <NumberInput
+                  required={true}
+                  value={paragraphCharacterCount}
+                  onChange={v => setParagraphCharacterCount(v ?? 0)}
+                />
+              )}
+            </Radio.Group>
+
             <NumberInput
               name="paragraphs"
               defaultValue={3}
@@ -107,7 +132,7 @@ function App() {
               Create
             </Button>
           </Group>
-        </Group>
+        </Stack>
       </form>
     </Box>
   );
